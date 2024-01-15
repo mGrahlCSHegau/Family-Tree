@@ -1,0 +1,24 @@
+{
+  "data": "Grandparent",
+  "children": [
+    {
+      "data": "Parent",
+      "children": [
+        {
+          "data": "Child"
+        },
+        {
+          "data": "Sibling"
+        }
+      ]
+    },
+    {
+      "data": "Aunt",
+      "children": [
+        {
+          "data": "Cousin"
+        }
+      ]
+    }
+  ]
+}
