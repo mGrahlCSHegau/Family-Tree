@@ -8,8 +8,10 @@ This Python project implements a basic family tree data structure that allows us
 
 - Simple and extensible tree data structure.
 - Addition of nodes to represent family members.
-- Retrieval of family information, including parents and all previous generations.
-- Saving and loading family information in a .json file.
+- Addition of n given generations.
+- Search nodes by ID
+- Retrieval of family information.
+- Saving and loading family information in a .csv or .json file.
 
 ## Requirements
    - git or GitHub Desktop
@@ -25,19 +27,15 @@ This Python project implements a basic family tree data structure that allows us
    cd family-tree-python
    ```
    #### GitHub Desktop:
-   >Open GitHub Desktop
-   >
-   >  1. File/ Clone Repository...
-   >  2. URL/ add this url: https://github.com/mGrahlCSHegau/Family-Tree.git
-   >  3. Choose a local path
+   \> Open GitHub Desktop
+   - File/ Clone Repository...
+   - URL/ add this url: https://github.com/mGrahlCSHegau/Family-Tree.git
+   - Choose a local path
 
 2. ### **Setup Developing environment**
-   >Open VSCode
-   >
-   >\>Dev Containers: Open Folder in Container
+   \>Open VSCode
+   - \>Dev Containers: Open Folder in Container
 
 3. ### **Usage**
-   >go to:
-   >/workspaces/Family-Tree/example_script.py
-   >
-   >Run Code (Ctrl+Alt+N) or the Run (▶) button in the top right corner.
+   \>go to: /workspaces/Family-Tree/example_script.py
+   - Run Code (Ctrl+Alt+N) or the Run (▶) button in the top right corner.
