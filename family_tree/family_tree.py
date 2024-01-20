@@ -13,11 +13,12 @@ import csv
 
 class Person:
     def __init__(self, id, data = None):
-        if not data:
-            data = {"name":None, "age":None, "parents_IDs": [], "child_ID" : None}
+        if data == None:
+            data = {"name":None, "age":None, "parents_IDs": [], "children_IDs" : []}
         self.id = id
         self.data = data
         self.parents = []
+        self.children = []
 
     def __str__(self):
         return f"{self.id}, {self.data}"
@@ -34,6 +35,7 @@ class Family:
         new_person = Person(id, data)
         if not self.root:
             self.root = new_person
+            self.root.children = None
             return
 
         child = self.find_person(child_id)
@@ -42,13 +44,14 @@ class Family:
         elif len(child.parents) >= 2:
             raise ValueError("A person can have at most two parents")
         else:
+            new_person.children.append(child)
             child.parents.append(new_person)
-            new_person.data["child_ID"] = child.id
+            new_person.data["children_IDs"] = [child.id]
             if len(child.data["parents_IDs"]) < 2:
                 child.data["parents_IDs"].append(new_person.id)
 
     def find_person(self, id, node=None):
-        if not node:
+        if node == None:
             node = self.root
 
         if node.id == id:
@@ -73,23 +76,22 @@ class Family:
             return
 
         generations = {}
-        self._gen_recursion(self.root, 0, generations, "s")
+        self._generation_recursion(self.root, 0, generations, usage="s")
         generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
 
         with open(filename, "w", newline='') as file:
             csv_writer = csv.writer(file)
-            csv_writer.writerow(['ID', 'name', 'age', 'parents_IDs', 'child_ID'])
+            csv_writer.writerow(['ID', 'name', 'age', 'parents_IDs', 'children_IDs'])
             for id, data in generations.items():
-                csv_writer.writerow([id, data['name'], data['age'], data['parents_IDs'], data['child_ID']])
+                csv_writer.writerow([id, data['name'], data['age'], data['parents_IDs'], data['children_IDs']])
 
     def save_to_json(self, filename):
         if not self.root:
             return
 
         generations = {}
-        self._gen_recursion(self.root, 0, generations, "s")
+        self._generation_recursion(self.root, 0, generations, usage = "s")
         generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
-        
         with open(filename, "w") as file:
             json.dump(generations, file, indent=2)
 
@@ -107,25 +109,26 @@ class Family:
                 id = row.pop("ID")
                 converted_row = {key: self.csv_convert(value) for key, value in row.items()}
 
-                if converted_row["child_ID"] == "None":
+                if converted_row["children_IDs"] == "None":
                     self.add_person(id, data=converted_row)
                     continue
-                self.add_person(id, converted_row["child_ID"], converted_row)
+                self.add_person(id, converted_row["children_IDs"][0], converted_row)
 
     def load_from_json(self, filename):
         with open(filename, "r") as file:
             data = json.load(file)
             for id, person_data in data.items():
-                child_id = person_data["child_ID"]
+                child_id = person_data["children_IDs"]
                 if child_id == None:
                     self.add_person(id, data = person_data)
                     continue
-                self.add_person(id, str(child_id), person_data)
+                for child in child_id:
+                    self.add_person(id, str(child), person_data)
 
     def csv_convert(self, value):
-        if value == '':
-            return None
-        if value[0] == "[" and value[-1] == "]":
+        if value == '[None]':
+            return [None]
+        if len(value) >= 2 and value[0] == "[" and value[-1] == "]":
             value = value[2:-2]
             elements = [item.strip() for item in value.split("', '")]
             return elements
@@ -135,33 +138,49 @@ class Family:
         person = self.find_person(id)
         print(person)
 
-    def print_generations(self):
-        if not self.root:
-            return
+    def print_related(self, node = None, limit = 2 ):
+        if not node:
+            node = self.root
+        else:
+            node = self.find_person(node)
+        
+        for up_down in (True, False):
+            ancestors = {}
+            self._generation_recursion(node, 0, ancestors, limit = limit, up_down = up_down)
 
-        generations = {}
-        self._gen_recursion(self.root, 0, generations)
-        generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
+            ancestors = dict(sorted(ancestors.items(), key=lambda x: int(x[0]), reverse=up_down))
+            
+            for generation, nodes in ancestors.items():
+                nodes = dict(sorted(nodes.items(), key=lambda x: int(x[0])))
+                match generation:
+                    case 0:
+                        if up_down:
+                            continue
+                        print(f"Person:", end=" ")
+                    case 1:
+                        print(f"{("Parents" if up_down else "Children")}:", end=" ")
+                    case 2:
+                        print(f"{("Grandparents" if up_down else "Grandhildren")}:", end=" ")
+                    case _:
+                        print((int(generation)-1)*"Great-",f"{("grandparents" if up_down else "children")}: ", sep="" ,end=" ")
+                
+                print(*[f"{node["name"]}" for _, node in nodes.items()])
 
-        for generation, nodes in generations.items():
-            nodes = dict(sorted(nodes.items(), key=lambda x: int(x[0])))
-            print(f"Generation {generation}:", end=" ")
-            for _, node in nodes.items():
-                print(f"{node}", end=", ")
-            print("")
-
-    def _gen_recursion(self, node, generation, generations, usage = "p"):
+    def _generation_recursion(self, node, generation, generations, limit = None, usage = "p", up_down = None):
         if usage == "p" and generation not in generations:
             generations[generation] = {}
 
         match usage:
-            case "p":
-                generations[generation].update({node.id:node.data["name"]})
             case "s":
-                generations.update({node.id: node.data})
-
-        for parent in sorted(getattr(node, "parents", []), key=lambda x: x.id):
-            self._gen_recursion(parent, generation + 1, generations, usage)
+                generations.update({node.id:node.data})
+                for parent in sorted(getattr(node, "parents", []), key=lambda x: x.id):
+                    self._generation_recursion(parent, generation + 1, generations, limit=(limit - 1 if limit else None), usage=usage , up_down=up_down)
+            case "p":
+                generations[generation].update({node.id: node.data})
+                if limit == 0:
+                    return
+                for parent in sorted(getattr(node, "parents" if up_down else "children", []), key=lambda x: x.id):
+                    self._generation_recursion(parent, generation + 1, generations, limit=(limit - 1 if limit else None), usage=usage , up_down=up_down)
 
     def add_n_persons(self, n, count, count_gen):
         if n == 0:

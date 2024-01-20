@@ -15,8 +15,8 @@ if "/workspaces/Family-Tree/family_tree/family_info.csv":
 else:
     family.add_n_gen(8)
 
-family.print_person("5")
+#family.print_person("4")
 
-family.print_generations()
+family.print_related("4")
 
-family.save_family("/workspaces/Family-Tree/family_tree/family_info.csv")
+family.save_family("/workspaces/Family-Tree/family_tree/family_info.json")

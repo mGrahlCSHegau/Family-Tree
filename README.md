@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Python project implements a basic family tree data structure that allows users to represent family relationships, query information about all family members as long as data is available, and save the family to a .csv or .json file. Due to the way it is implemented, it is recommended to use a .csv file. This file format takes up less space. However, it requires some conversion, which may result in longer run times.
+This Python project implements a simple family tree in a graph data structure that allows users to represent family relationships, query information about all family members as long as data is available, and save the family to a .csv or .json file. Due to the way it is implemented, it is recommended to use a .csv file. This file format takes up less space. However, it requires some conversion, which may result in longer run times.
 
 ## Features
 
