@@ -19,5 +19,12 @@ This Python project implements a basic family tree data structure, allowing user
    cd family-tree-python
 2. **Setup Developing environment**
    >Open VSCode
-   >Dev Containers: Open Folder in Container
-   >run /workspaces/Family-Tree/example_script.py
+   
+   >\>Dev Containers: Open Folder in Container
+   
+   >/workspaces/Family-Tree/example_script.py
+   ```python
+   ...
+3. **have fun**
+
+   happy coding 
