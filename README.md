@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This Python project implements a basic family tree data structure, allowing users to represent family relationships, query information about all Family members as long as data is available, and save the family to a .json file.
+This Python project implements a basic family tree data structure that allows users to represent family relationships, query information about all family members as long as data is available, and save the family to a .csv or .json file. Due to the way it is implemented, it is recommended to use a .csv file. This file format takes up less space. However, it requires some conversion, which may result in longer run times.
 
 ## Features
 
@@ -11,20 +11,33 @@ This Python project implements a basic family tree data structure, allowing user
 - Retrieval of family information, including parents and all previous generations.
 - Saving and loading family information in a .json file.
 
+## Requirements
+   - git or GitHub Desktop
+   - VS Code
+   - Docker
+
 ## Getting Started
 
-1. **Clone this Repository:**
+1. ### **Clone this Repository:**
+   #### git:
    ```bash
    git clone https://github.com/mGrahlCSHegau/Family-Tree.git
    cd family-tree-python
-2. **Setup Developing environment**
-   >Open VSCode
-   
-   >\>Dev Containers: Open Folder in Container
-   
-   >/workspaces/Family-Tree/example_script.py
-   ```python
-   ...
-3. **have fun**
+   ```
+   #### GitHub Desktop:
+   >Open GitHub Desktop
+   >
+   >  1. File/ Clone Repository...
+   >  2. URL/ add this url: https://github.com/mGrahlCSHegau/Family-Tree.git
+   >  3. Choose a local path
 
-   happy coding 
+2. ### **Setup Developing environment**
+   >Open VSCode
+   >
+   >\>Dev Containers: Open Folder in Container
+
+3. ### **Usage**
+   >go to:
+   >/workspaces/Family-Tree/example_script.py
+   >
+   >Run Code (Ctrl+Alt+N) or the Run (▶) button in the top right corner.
