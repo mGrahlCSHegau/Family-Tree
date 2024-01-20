@@ -141,17 +141,22 @@ class Family:
 
         generations = {}
         self._gen_recursion(self.root, 0, generations)
-        
+        generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
+
         for generation, nodes in generations.items():
-            print(f"Generation {generation}:", ', '.join(sorted(str(node) for node in nodes)))
+            nodes = dict(sorted(nodes.items(), key=lambda x: int(x[0])))
+            print(f"Generation {generation}:", end=" ")
+            for _, node in nodes.items():
+                print(f"{node}", end=", ")
+            print("")
 
     def _gen_recursion(self, node, generation, generations, usage = "p"):
         if usage == "p" and generation not in generations:
-            generations[generation] = []
+            generations[generation] = {}
 
         match usage:
             case "p":
-                generations[generation].append(node.id)
+                generations[generation].update({node.id:node.data["name"]})
             case "s":
                 generations.update({node.id: node.data})
 
