@@ -9,14 +9,18 @@ Author: Merlin Grahl
 Date: 15/Jan/2024 | 16:00(MEZ)
 """
 import json
+import csv
 
 class Person:
     def __init__(self, id, data = None):
         if not data:
-            data = {"name":None, "age":None, "parents_IDs": None, "child_ID" : None}
+            data = {"name":None, "age":None, "parents_IDs": [], "child_ID" : None}
         self.id = id
         self.data = data
         self.parents = []
+
+    def __str__(self):
+        return f"{self.id}, {self.data}"
 
 class Family:
     def __init__(self):
@@ -40,8 +44,9 @@ class Family:
         else:
             child.parents.append(new_person)
             new_person.data["child_ID"] = child.id
-            
-    
+            if len(child.data["parents_IDs"]) < 2:
+                child.data["parents_IDs"].append(new_person.id)
+
     def find_person(self, id, node=None):
         if not node:
             node = self.root
@@ -57,51 +62,102 @@ class Family:
         return None
 
     def save_family(self, filename):
+        match filename[-1]:
+            case "v":
+                self.save_to_csv(filename)
+            case "n":
+                self.save_to_json(filename)
+
+    def save_to_csv(self, filename):
         if not self.root:
             return
 
         generations = {}
-        self._gen_recrusion(self.root, 0, generations, "s")
+        self._gen_recursion(self.root, 0, generations, "s")
+        generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
 
+        with open(filename, "w", newline='') as file:
+            csv_writer = csv.writer(file)
+            csv_writer.writerow(['ID', 'name', 'age', 'parents_IDs', 'child_ID'])
+            for id, data in generations.items():
+                csv_writer.writerow([id, data['name'], data['age'], data['parents_IDs'], data['child_ID']])
+
+    def save_to_json(self, filename):
+        if not self.root:
+            return
+
+        generations = {}
+        self._gen_recursion(self.root, 0, generations, "s")
+        generations = dict(sorted(generations.items(), key=lambda x: int(x[0])))
+        
         with open(filename, "w") as file:
             json.dump(generations, file, indent=2)
 
     def load_family(self, filename):
+        match filename[-1]:
+            case "v":
+                self.load_from_csv(filename)
+            case "n":
+                self.load_from_json(filename)
+
+    def load_from_csv(self, filename):
+        with open(filename, "r", newline='') as file:
+            csv_reader = csv.DictReader(file)
+            for row in csv_reader:
+                id = row.pop("ID")
+                converted_row = {key: self.csv_convert(value) for key, value in row.items()}
+
+                if converted_row["child_ID"] == "None":
+                    self.add_person(id, data=converted_row)
+                    continue
+                self.add_person(id, converted_row["child_ID"], converted_row)
+
+    def load_from_json(self, filename):
         with open(filename, "r") as file:
             data = json.load(file)
-            for gen, persons_data in data.items():
-                for person_data in persons_data:
-                    for person_id in person_data.keys():
-                        person_data = person_data[str(person_id)]
-                        child_id = person_data["child_ID"]
-                        if child_id == None:
-                            self.add_person(person_id, data = person_data)
-                            continue
-                        self.add_person(person_id, str(child_id), person_data)
+            for id, person_data in data.items():
+                child_id = person_data["child_ID"]
+                if child_id == None:
+                    self.add_person(id, data = person_data)
+                    continue
+                self.add_person(id, str(child_id), person_data)
+
+    def csv_convert(self, value):
+        if value == '':
+            return None
+        if value[0] == "[" and value[-1] == "]":
+            value = value[2:-2]
+            elements = [item.strip() for item in value.split("', '")]
+            return elements
+        return value
+
+    def print_person(self, id):
+        person = self.find_person(id)
+        print(person)
 
     def print_generations(self):
         if not self.root:
             return
 
         generations = {}
-        self._gen_recrusion(self.root, 0, generations)
+        self._gen_recursion(self.root, 0, generations)
         
         for generation, nodes in generations.items():
             print(f"Generation {generation}:", ', '.join(sorted(str(node) for node in nodes)))
 
-    def _gen_recrusion(self, node, generation, generations, usage = "p"):
-        if generation not in generations:
+    def _gen_recursion(self, node, generation, generations, usage = "p"):
+        if usage == "p" and generation not in generations:
             generations[generation] = []
 
         match usage:
             case "p":
                 generations[generation].append(node.id)
             case "s":
-                generations[generation].append({node.id: node.data})
+                generations.update({node.id: node.data})
 
         for parent in sorted(getattr(node, "parents", []), key=lambda x: x.id):
-            self._gen_recrusion(parent, generation + 1, generations, usage)
-    
+            self._gen_recursion(parent, generation + 1, generations, usage)
+
     def add_n_persons(self, n, count, count_gen):
         if n == 0:
             return count
