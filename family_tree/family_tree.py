@@ -162,9 +162,11 @@ class Family:
                     case 2:
                         print(f"{("Grandparents" if up_down else "Grandhildren")}:", end=" ")
                     case _:
-                        print((int(generation)-1)*"Great-",f"{("grandparents" if up_down else "children")}: ", sep="" ,end=" ")
+                        print((int(generation)-2)*"Great-",f"{("grandparents" if up_down else "children")}: ", sep="" ,end=" ")
                 
-                print(*[f"{node["name"]}" for _, node in nodes.items()])
+                print(*[f"{node["name"]} |" for _, node in nodes.items()])
+                print("    |")
+
 
     def _generation_recursion(self, node, generation, generations, limit = None, usage = "p", up_down = None):
         if usage == "p" and generation not in generations:
